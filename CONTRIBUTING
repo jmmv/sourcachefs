@@ -1,0 +1,18 @@
+Before we can use your code, you must sign the Google Individual Contributor
+License Agreement, also known as the CLA, which you can easily do online.  The
+CLA is necessary mainly because you own the copyright to your changes, even
+after your contribution becomes part of our codebase, so we need your
+permission to use and distribute your code.  We also need to be sure of various
+other things--for instance that you will tell us if you know that your code
+infringes on other people's patents.  You do not have to sign the CLA until
+after you have submitted your code for review and a member has approved it, but
+you must do it before we can put your code into our codebase.
+
+    https://developers.google.com/open-source/cla/individual
+
+Contributions made by corporations are covered by a different agreement than
+the one above: the Google Software Grant and Corporate Contributor License
+Agreement.  Please get your company to sign this agreement instead if your
+contribution is on their behalf.
+
+    https://developers.google.com/open-source/cla/corporate

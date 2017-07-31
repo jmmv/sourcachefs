@@ -1,0 +1,76 @@
+# Copyright 2016 Google Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not
+# use this file except in compliance with the License.  You may obtain a copy
+# of the License at:
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+GOPATH := $(SRCDIR):$(DEPSDIR)
+
+GO = GOPATH="$(GOPATH)" GOROOT="$(GOROOT)" "$(GOROOT)/bin/go"
+GOFMT = $(GOROOT)/bin/gofmt
+
+CLEANFILES += bin pkg
+
+.PHONY: default
+default: Makefile all  # Keep this target definition as the very first one.
+
+# TODO(jmmv): Should automatically reinvoke configure... but this is difficult
+# because we need to remember the flags originally passed by the user, and
+# we need to tell make to reload the Makefile somehow.
+Makefile: configure Makefile.in
+	@echo "Makefile out of date; rerun ./configure with desired args"
+	@false
+
+.PHONY: all
+all: bin/sourcachefs
+
+STATS = github.com/jmmv/sourcachefs/stats
+
+LDFLAGS = -X $(STATS).buildTimestamp=$$(date "+%Y-%m-%dT%H:%M:%S") \
+          -X $(STATS).buildWhere=$$(id -un)@$$(hostname) \
+          -X $(STATS).gitRevision=$$(git rev-parse HEAD)
+
+# TODO(jmmv): This should NOT be a phony target.  However, I do not know yet
+# how to track dependencies for .go source files, nor whether this should be
+# done.  Force a rebuild for now.
+.PHONY: bin/sourcachefs
+CLEANFILES += bin/sourcachefs
+CLEANALLFILES += bin
+bin/sourcachefs:
+	@mkdir -p bin
+	$(GO) build \
+	    -ldflags "$(LDFLAGS)" \
+	    -o bin/sourcachefs \
+	    src/github.com/jmmv/sourcachefs/main.go
+
+.PHONY: check
+check: bin/sourcachefs
+	SOURCACHEFS="$$(pwd)/bin/sourcachefs" $(GO) test \
+	    github.com/jmmv/sourcachefs \
+	    github.com/jmmv/sourcachefs/cache
+
+.PHONY: fmt
+fmt:
+	find . -name .git -o -name deps -prune -o -name "*.go" -print \
+	    | xargs "$(GOFMT)" -w
+
+.PHONY: lint
+lint:
+	@GOFMT="$(GOFMT)" GOLINT="$(DEPSDIR)/bin/golint" \
+	    ./admin/lint.sh $(LINT_FILES)
+
+.PHONY: clean
+clean:
+	rm -rf $(CLEANFILES)
+
+.PHONY: cleanall
+cleanall: clean
+	rm -rf $(CLEANALLFILES)

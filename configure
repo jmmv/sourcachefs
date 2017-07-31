@@ -1,0 +1,214 @@
+#! /bin/sh
+# Copyright 2016 Google Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not
+# use this file except in compliance with the License.  You may obtain a copy
+# of the License at:
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+ProgName="${0##*/}"
+
+# Static package settings.
+DEPSDIR="$(cd "$(dirname "${0}")" && pwd -P)/deps"
+PKGNAME=sourcachefs
+SRCDIR="$(cd "$(dirname "${0}")" && pwd -P)"
+
+# Dynamically-configured settings.
+APP_ID=
+CLEANFILES=
+CLEANALLFILES=
+GO_APPENGINE=
+USE_LOCAL_MYSQL=
+
+# List of variables exposed to the Makefile.
+MK_VARS="CLEANFILES CLEANALLFILES DEPSDIR GOROOT PKGNAME SRCDIR"
+
+info() {
+    echo "${ProgName}: I: ${@}" 1>&2
+}
+
+err() {
+    echo "${ProgName}: E: ${@}" 1>&2
+    exit 1
+}
+
+setup_git() {
+    local git_dir="${1}"; shift
+
+    cd "${git_dir}/hooks"
+    for hook in ../../admin/pre-commit; do
+        info "Installing git hook ${hook##*/}"
+        ln -s -f "${hook}" .
+    done
+    cd - >/dev/null 2>&1
+
+    # We don't add the hooks to CLEAN*FILES on purpose.  Once we have run
+    # configure once, we want the git checkout to remain configured with the
+    # hooks because it's perfectly reasonable to attempt to commit a change
+    # after running a "make clean".
+}
+
+find_in_path() {
+    local prog="${1}"; shift
+
+    local oldifs="${IFS}"
+    IFS=:
+    set -- ${PATH}
+    IFS="${oldifs}"
+
+    while [ ${#} -gt 0 ]; do
+        if [ -x "${1}/${prog}" ]; then
+            echo "${1}/${prog}"
+            break
+        else
+            shift
+        fi
+    done
+}
+
+# TODO(jmmv): This is ugly.  Fetching dependencies from their HEAD is bad
+# because we are pulling "untested" code and therefore can introduce
+# regressions without knowing about them.  We should either be able to rely
+# on dependencies provided by the OS via its packaging system, or we should
+# be able to specify the specific version to retrieve from the remote site.
+get_go_dep() {
+    local dependency="${1}"; shift
+
+    local module="${dependency##*/}"
+    local patches="$(cd patches && ls -1 "${module}".*.diff 2>/dev/null)"
+
+    mkdir -p "${DEPSDIR}"
+    info "Getting ${dependency}"
+    GOPATH="${DEPSDIR}" "${GOROOT}/bin/go" get -t "${dependency}" \
+        || err "Failed to get ${dependency}"
+
+    if [ -n "${patches}" ]; then
+        local applied=no
+        for patch in ${patches}; do
+            local cookie="deps/src/${dependency}/.patch-${patch}"
+            [ ! -f "${cookie}" ] || continue
+            info "Applying patch ${patch}"
+            patch -p0 <"patches/${patch}" || err "Failed to apply ${patch}"
+            touch "${cookie}"
+            applied=yes
+        done
+        [ "${applied}" = no ] || \
+            GOPATH="${DEPSDIR}" "${GOROOT}/bin/go" get -t "${dependency}" \
+            || err "Failed to get ${dependency}"
+    fi
+}
+
+set_goroot() {
+    local user_override="${1}"; shift
+
+    if [ -n "${user_override}" ]; then
+        [ -e "${user_override}/bin/go" ] || err "go not found in" \
+            "${user_override}; bogus argument to --goroot?"
+        GOROOT="${user_override}"
+    else
+        local go="$(find_in_path go)"
+        [ -n "${go}" ] || err "Cannot find go in path; pass" \
+            "--goroot=/path/to/goroot to configure"
+        local dir
+        if [ -h "${go}" ]; then
+            local target="$(readlink "${go}")"
+            case "${target}" in
+                /*) dir="$(dirname "${target}")/.." ;;
+                *) dir="$(dirname "${go}")/$(dirname "${target}")/.." ;;
+            esac
+        else
+            dir="$(dirname "${go}")/.."
+        fi
+        GOROOT="$(cd "${dir}" && pwd -P)"
+    fi
+
+    info "Using Go from: ${GOROOT}"
+}
+
+setup_vscode() {
+    # These dependencies come from the documentation of the Go plugin for the
+    # Visual Studio Code editor.
+    get_go_dep github.com/derekparker/delve/cmd/dlv
+    get_go_dep github.com/golang/lint/golint
+    get_go_dep github.com/lukehoban/go-outline
+    get_go_dep github.com/newhook/go-symbols
+    get_go_dep github.com/nsf/gocode
+    get_go_dep github.com/ramya-rao-a/go-outline
+    get_go_dep github.com/rogpeppe/godef
+    get_go_dep github.com/tpng/gopkgs
+    get_go_dep golang.org/x/tools/cmd/godoc
+    get_go_dep golang.org/x/tools/cmd/goimports
+    get_go_dep golang.org/x/tools/cmd/gorename
+    get_go_dep golang.org/x/tools/cmd/guru
+    get_go_dep sourcegraph.com/sqs/goreturns
+
+    # TODO(jmmv): Should be a global, but I do not want to give the impression
+    # in the script that GOPATH should be available all the time because,
+    # depending on what we are doing (e.g. fetching dependencies) we do not
+    # want the default value.
+    local gopath="${SRCDIR}:${DEPSDIR}"
+
+    CLEANALLFILES="${CLEANALLFILES} .vscode/settings.json"
+    {
+        echo '// AUTOMATICALLY GENERATED!!!'
+        echo '// EDIT settings.json.in INSTEAD'
+        sed -e "s,__GOPATH__,${gopath},g" -e "s,__GOROOT__,${GOROOT},g" \
+            .vscode/settings.json.in
+    } >.vscode/settings.json
+}
+
+generate_makefile() {
+    local src="${1}"; shift
+    local dest="${1}"; shift
+
+    info "Generating ${dest}"
+    echo "# AUTOMATICALLY GENERATED; DO NOT EDIT!" >"${dest}.tmp"
+    for var in ${MK_VARS}; do
+        local value
+        eval "value=\"\$${var}\""
+        echo "${var} = ${value}" >>"${dest}.tmp"
+    done
+    cat "${src}" >>"${dest}.tmp"
+    mv "${dest}.tmp" "${dest}"
+}
+
+main() {
+    cd "${SRCDIR}"
+
+    local enable_vscode=no
+    local goroot=
+    for arg in "${@}"; do
+        case "${arg}" in
+            --enable-vscode) enable_vscode=yes ;;
+            --goroot=*) goroot="${arg#*=}" ;;
+            *) err "Unknown argument ${arg}" ;;
+        esac
+    done
+
+    set_goroot "${goroot}"
+
+    CLEANALLFILES="${DEPSDIR}"
+
+    [ -d .git ] && setup_git .git
+
+    get_go_dep bazil.org/fuse
+    get_go_dep github.com/dustin/go-humanize
+    get_go_dep github.com/golang/glog
+    get_go_dep github.com/golang/lint/golint
+    get_go_dep github.com/mattn/go-sqlite3
+    get_go_dep github.com/stretchr/testify/suite
+
+    [ "${enable_vscode}" = no ] || setup_vscode
+
+    CLEANALLFILES="${CLEANALLFILES} Makefile"
+    generate_makefile Makefile.in Makefile
+}
+
+main "${@}"
