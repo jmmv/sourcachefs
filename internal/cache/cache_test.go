@@ -19,9 +19,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/jmmv/sourcachefs/real"
-	"github.com/jmmv/sourcachefs/stats"
-	"github.com/jmmv/sourcachefs/test"
+	"github.com/jmmv/sourcachefs/internal/real"
+	"github.com/jmmv/sourcachefs/internal/stats"
+	"github.com/jmmv/sourcachefs/internal/test"
 	"github.com/stretchr/testify/suite"
 )
 

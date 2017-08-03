@@ -18,8 +18,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/jmmv/sourcachefs/test"
 	"github.com/stretchr/testify/suite"
+
+	"github.com/jmmv/sourcachefs/internal/test"
 )
 
 // newTestSqliteDb creates or opens an SQLite database and fails the test if

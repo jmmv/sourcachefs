@@ -23,8 +23,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/jmmv/sourcachefs/real"
-	"github.com/jmmv/sourcachefs/stats"
+	"github.com/jmmv/sourcachefs/internal/real"
+	"github.com/jmmv/sourcachefs/internal/stats"
 )
 
 // ContentCache implements the content cache.

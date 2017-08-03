@@ -18,10 +18,11 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
-
-	"github.com/jmmv/sourcachefs/test"
-	"github.com/stretchr/testify/suite"
 	"time"
+
+	"github.com/stretchr/testify/suite"
+
+	"github.com/jmmv/sourcachefs/internal/test"
 )
 
 type NewMetadataCacheSuite struct {

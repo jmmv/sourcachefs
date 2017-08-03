@@ -26,9 +26,9 @@ import (
 	"bazil.org/fuse/fs"
 	"github.com/golang/glog"
 
-	"github.com/jmmv/sourcachefs/cache"
-	"github.com/jmmv/sourcachefs/real"
-	"github.com/jmmv/sourcachefs/stats"
+	"github.com/jmmv/sourcachefs/internal/cache"
+	"github.com/jmmv/sourcachefs/internal/real"
+	"github.com/jmmv/sourcachefs/internal/stats"
 )
 
 type globalState struct {

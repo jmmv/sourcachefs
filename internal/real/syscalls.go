@@ -21,7 +21,7 @@ import (
 
 	"github.com/golang/glog"
 
-	"github.com/jmmv/sourcachefs/stats"
+	"github.com/jmmv/sourcachefs/internal/stats"
 )
 
 // FileReader is the interface to invoke read-only operations with statistics tracking.

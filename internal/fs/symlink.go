@@ -23,7 +23,7 @@ import (
 	"github.com/golang/glog"
 	"golang.org/x/net/context"
 
-	"github.com/jmmv/sourcachefs/stats"
+	"github.com/jmmv/sourcachefs/internal/stats"
 )
 
 type lazySymlinkData struct {

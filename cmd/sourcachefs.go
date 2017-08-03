@@ -25,10 +25,10 @@ import (
 
 	"github.com/golang/glog"
 
-	"github.com/jmmv/sourcachefs/cache"
-	"github.com/jmmv/sourcachefs/fs"
-	"github.com/jmmv/sourcachefs/real"
-	"github.com/jmmv/sourcachefs/stats"
+	"github.com/jmmv/sourcachefs/internal/cache"
+	"github.com/jmmv/sourcachefs/internal/fs"
+	"github.com/jmmv/sourcachefs/internal/real"
+	"github.com/jmmv/sourcachefs/internal/stats"
 )
 
 // progname computes and returns the name of the current program.

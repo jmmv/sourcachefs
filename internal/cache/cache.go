@@ -19,8 +19,8 @@ import (
 
 	"github.com/golang/glog"
 
-	"github.com/jmmv/sourcachefs/real"
-	"github.com/jmmv/sourcachefs/stats"
+	"github.com/jmmv/sourcachefs/internal/real"
+	"github.com/jmmv/sourcachefs/internal/stats"
 )
 
 // Cache implements the unified cache.

@@ -46,16 +46,13 @@ CLEANFILES += bin/sourcachefs
 CLEANALLFILES += bin
 bin/sourcachefs:
 	@mkdir -p bin
-	$(GO) build \
-	    -ldflags "$(LDFLAGS)" \
-	    -o bin/sourcachefs \
-	    src/github.com/jmmv/sourcachefs/main.go
+	$(GO) build -ldflags "$(LDFLAGS)" -o bin/sourcachefs \
+	    ./cmd/sourcachefs.go
 
 .PHONY: check
 check: bin/sourcachefs
 	SOURCACHEFS="$$(pwd)/bin/sourcachefs" $(GO) test \
-	    github.com/jmmv/sourcachefs \
-	    github.com/jmmv/sourcachefs/cache
+	    ./cmd ./internal/cache
 
 .PHONY: fmt
 fmt:

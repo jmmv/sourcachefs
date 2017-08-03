@@ -3,3 +3,4 @@ Makefile
 /bin
 /deps
 /pkg
+/src

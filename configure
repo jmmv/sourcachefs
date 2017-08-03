@@ -207,6 +207,12 @@ main() {
 
     [ "${enable_vscode}" = no ] || setup_vscode
 
+    CLEANALLFILES="${CLEANALLFILES} src"
+    mkdir -p src/github.com/jmmv
+    [ -h src/github.com/jmmv/sourcachefs ] \
+        || ln -hfs ../../.. src/github.com/jmmv/sourcachefs \
+        || err "Failed to create src directory to mimic GOPATH"
+
     CLEANALLFILES="${CLEANALLFILES} Makefile"
     generate_makefile Makefile.in Makefile
 }

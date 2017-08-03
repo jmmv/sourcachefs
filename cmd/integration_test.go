@@ -25,7 +25,7 @@ import (
 
 	"bazil.org/fuse"
 
-	"github.com/jmmv/sourcachefs/test"
+	"github.com/jmmv/sourcachefs/internal/test"
 	"github.com/stretchr/testify/suite"
 )
 

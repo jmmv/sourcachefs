@@ -81,7 +81,7 @@ main() {
 
     for file in "${@}"; do
         case "${file}" in
-            AUTHORS|CONTRIBUTING|CONTRIBUTORS|LICENSE|README.md)
+            AUTHORS|CONTRIBUTING|CONTRIBUTORS|LICENSE|README.md|.gitignore)
                 continue
                 ;;
         esac
