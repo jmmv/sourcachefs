@@ -47,12 +47,12 @@ CLEANALLFILES += bin
 bin/sourcachefs:
 	@mkdir -p bin
 	$(GO) build -ldflags "$(LDFLAGS)" -o bin/sourcachefs \
-	    ./cmd/sourcachefs.go
+	    ./cmd/sourcachefs/main.go
 
 .PHONY: check
 check: bin/sourcachefs
 	SOURCACHEFS="$$(pwd)/bin/sourcachefs" $(GO) test \
-	    ./cmd ./internal/cache
+	    ./cmd/sourcachefs ./internal/cache
 
 .PHONY: fmt
 fmt:
