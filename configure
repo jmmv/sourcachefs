@@ -81,28 +81,10 @@ find_in_path() {
 get_go_dep() {
     local dependency="${1}"; shift
 
-    local module="${dependency##*/}"
-    local patches="$(cd patches && ls -1 "${module}".*.diff 2>/dev/null)"
-
     mkdir -p "${DEPSDIR}"
     info "Getting ${dependency}"
     GOPATH="${DEPSDIR}" "${GOROOT}/bin/go" get -t "${dependency}" \
         || err "Failed to get ${dependency}"
-
-    if [ -n "${patches}" ]; then
-        local applied=no
-        for patch in ${patches}; do
-            local cookie="deps/src/${dependency}/.patch-${patch}"
-            [ ! -f "${cookie}" ] || continue
-            info "Applying patch ${patch}"
-            patch -p0 <"patches/${patch}" || err "Failed to apply ${patch}"
-            touch "${cookie}"
-            applied=yes
-        done
-        [ "${applied}" = no ] || \
-            GOPATH="${DEPSDIR}" "${GOROOT}/bin/go" get -t "${dependency}" \
-            || err "Failed to get ${dependency}"
-    fi
 }
 
 set_goroot() {
