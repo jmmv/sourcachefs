@@ -56,7 +56,7 @@ The following non-standard flags are recognized:
 ## Contributing
 
 Want to contribute?  Great!  But please first read the guidelines provided
-in [CONTRIBUTING.md](CONTRIBUTING.md).
+in [CONTRIBUTING](CONTRIBUTING).
 
 If you are curious about who made this project possible, you can check out
 the [list of copyright holders](AUTHORS) and the [list of
