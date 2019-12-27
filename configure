@@ -201,7 +201,7 @@ main() {
     get_go_dep bazil.org/fuse
     get_go_dep github.com/dustin/go-humanize
     get_go_dep github.com/golang/glog
-    get_go_dep github.com/golang/lint/golint
+    get_go_dep golang.org/x/lint/golint
     get_go_dep github.com/mattn/go-sqlite3
     get_go_dep github.com/stretchr/testify/suite
 
