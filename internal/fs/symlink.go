@@ -15,13 +15,13 @@
 package fs
 
 import (
+	"context"
 	"os"
 	"sync"
 
 	"bazil.org/fuse"
 	"bazil.org/fuse/fs"
 	"github.com/golang/glog"
-	"golang.org/x/net/context"
 
 	"github.com/jmmv/sourcachefs/internal/stats"
 )
