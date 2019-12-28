@@ -144,8 +144,9 @@ func (s *MetadataCacheSuite) TestPutNewOrUpdate() {
 func (s *MetadataCacheSuite) TestPutFileInfoAndGet() {
 	inode, err := s.cache.PutNewWithType("/path", 0)
 	s.Require().NoError(err)
-
-	fileInfo := newFileInfo("/path", 123, 0, time.Now())
+	// Strip monotonic clock reading for comparisons with require.Equal.
+	// See https://github.com/stretchr/testify/issues/502 for details.
+	fileInfo := newFileInfo("/path", 123, 0, time.Now().Round(0))
 	s.Require().NoError(s.cache.PutFileInfo(inode, fileInfo))
 
 	row := s.checkedGetFullEntry("/path", "file")
