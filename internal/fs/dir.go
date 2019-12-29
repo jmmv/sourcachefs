@@ -15,6 +15,7 @@
 package fs
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"sync"
@@ -22,7 +23,6 @@ import (
 	"bazil.org/fuse"
 	"bazil.org/fuse/fs"
 	"github.com/golang/glog"
-	"golang.org/x/net/context"
 
 	"github.com/jmmv/sourcachefs/internal/cache"
 	"github.com/jmmv/sourcachefs/internal/stats"
