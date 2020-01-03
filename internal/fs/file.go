@@ -16,6 +16,7 @@ package fs
 
 import (
 	"context"
+	"io"
 	"os"
 	"sync"
 
@@ -42,6 +43,9 @@ func (file *openFile) Read(ctx context.Context, req *fuse.ReadRequest, resp *fus
 	file.globals.stats.AccountCacheHit(stats.ReadFuseOp)
 	resp.Data = resp.Data[:req.Size]
 	n, err := file.reader.ReadAt(resp.Data, req.Offset)
+	if err == io.EOF {
+		err = nil
+	}
 	if err != nil {
 		glog.Errorf("read error: %s", err)
 	}
